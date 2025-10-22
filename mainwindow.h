@@ -52,6 +52,9 @@ private:
     int counterSLAVA = 0;
     int packOXXY;
     int packSLAVA;
+    int counter = 0;
+    bool GameVsComputer = false;
+    bool NewGameComputer = true;
     
 
 public:
@@ -65,6 +68,7 @@ public:
     void OXXY_2_SOUNDS(int counter);
     void SLAVA_1_SOUNDS(int counter);
     void SLAVA_2_SOUNDS(int counter);
+    void ComputerMove();
 
     
 private slots:
@@ -72,7 +76,7 @@ private slots:
     void clickOnField();
     void returnToMenuSlot (QPushButton* returnButton, QLabel* label);
     void ToggleMusicSlot();
-    
+    void startComputerSlot();
    
 
 

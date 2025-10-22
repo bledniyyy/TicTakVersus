@@ -8,11 +8,17 @@ enum class Player {
     Y = 2
 };
 
+enum class ComputerVsPlayer {
+    COMPUTER = 2,
+    PLAYERc = 1
+};
+
 
 class Tiktaktoe {
 
 private:
     Player player;
+    ComputerVsPlayer AIplayer;
     int row;
     int col;
     std::vector<std::vector<int>> field;
@@ -34,12 +40,12 @@ public:
         return field[x][y];
     }
 
-    const bool CheckWin  (int player) const {
-        return CheckRols(player) || CheckCols(player) || 
-           CheckMainDiagonal(player) || CheckPobDiagonal(player);
+    const bool CheckWin  (const std::vector<std::vector<int>>& field, int player) const {
+        return CheckRols(field,player) || CheckCols(field,player) || 
+           CheckMainDiagonal(field,player) || CheckPobDiagonal(field,player);
     }
 
-    bool CheckRols (int player) const {
+    bool CheckRols (const std::vector<std::vector<int>>& field ,int player) const {
         if (field.empty() || field.size() != 3) return false;
         for (int i = 0; i < 3; i++) {
             if (field[i].size() != 3) continue;
@@ -52,7 +58,7 @@ public:
         return false;
     }
 
-    bool CheckCols (int player) const {
+    bool CheckCols (const std::vector<std::vector<int>>& field ,int player) const {
         if (field.empty() || field.size() != 3) return false;
         for (int j = 0; j < 3; j++) {
             if (field[j].size() != 3) continue;
@@ -65,7 +71,7 @@ public:
         return false;
     }
 
-    bool CheckMainDiagonal (int player) const {
+    bool CheckMainDiagonal (const std::vector<std::vector<int>>& field ,int player) const {
         if (field.empty() || field.size() != 3) return false;
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
@@ -77,7 +83,7 @@ public:
         
         return false;  
     }
-    bool CheckPobDiagonal  (int player) const {
+    bool CheckPobDiagonal  (const std::vector<std::vector<int>>& field,int player) const {
         if (field.empty() || field.size() != 3) return false;
         if (field[0][2] == player && field[1][1] == player && field[2][0] == player) {
             return true;
@@ -92,5 +98,109 @@ public:
             });
         });
     }
+
+
+
+ int minimax(std::vector<std::vector<int>> field, int depth, bool isAI)
+{ 
+    
+    if (CheckWin(field, static_cast<int>(ComputerVsPlayer::COMPUTER))) {
+        return 10 - depth; 
+    }
+    if (CheckWin(field, static_cast<int>(ComputerVsPlayer::PLAYERc))) {
+        return depth - 10; 
+    }
+    
+    
+    bool isFull = true;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (field[i][j] == 0) {
+                isFull = false;
+                break;
+            }
+        }
+        if (!isFull) break;
+    }
+    
+    if (isFull) {
+        return 0; 
+    }
+    
+    if (isAI) {
+        int bestScore = -999;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (field[i][j] == 0) {
+                    field[i][j] = static_cast<int>(ComputerVsPlayer::COMPUTER);
+                    int score = minimax(field, depth + 1, false);
+                    field[i][j] = 0;
+                    if (score > bestScore) {
+                        bestScore = score;
+                    }
+                }
+            }
+        }
+        return bestScore;
+    } else {
+        int bestScore = 999;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (field[i][j] == 0) {
+                    field[i][j] = static_cast<int>(ComputerVsPlayer::PLAYERc);
+                    int score = minimax(field, depth + 1, true);
+                    field[i][j] = 0;
+                    if (score < bestScore) {
+                        bestScore = score;
+                    }
+                }
+            }
+        }
+        return bestScore;
+    }
+}
+
+int bestMove(int moveIndex)
+{   
+    int x = -1, y = -1;
+    int bestScore = -999;
+    
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (field[i][j] == 0) {
+                field[i][j] = static_cast<int>(ComputerVsPlayer::COMPUTER);
+                int score = minimax(field, moveIndex + 1, false);
+                field[i][j] = 0;
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    x = i;
+                    y = j;
+                }
+            }
+        }
+    }
+    
+    
+    if (x == -1 || y == -1) {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (field[i][j] == 0) {
+                    x = i;
+                    y = j;
+                    break;
+                }
+            }
+            if (x != -1) break;
+        }
+    }
+    
+    return x * 3 + y;
+}
+
+
+std::vector<std::vector<int>> returnField() {
+	return field;
+}
 };
 

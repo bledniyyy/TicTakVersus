@@ -32,30 +32,26 @@
    <widget class="QWidget" name="verticalLayoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>130</x>
+      <x>100</x>
       <y>300</y>
-      <width>261</width>
-      <height>111</height>
+      <width>311</width>
+      <height>191</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
       <layout class="QVBoxLayout" name="verticalLayout_4">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetMaximumSize</enum>
+       </property>
        <item>
         <widget class="QPushButton" name="StartButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="font">
           <font>
            <family>Pixelify Sans</family>
@@ -65,7 +61,28 @@
           </font>
          </property>
          <property name="text">
-          <string>Начать игру</string>
+          <string>Начать игру (2 игрока)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="StartButton_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>Pixelify Sans</family>
+           <pointsize>12</pointsize>
+           <italic>false</italic>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Начать игру (1 игрок)</string>
          </property>
         </widget>
        </item>
@@ -91,7 +108,7 @@
     <property name="geometry">
      <rect>
       <x>70</x>
-      <y>100</y>
+      <y>110</y>
       <width>361</width>
       <height>381</height>
      </rect>

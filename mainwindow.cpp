@@ -70,6 +70,7 @@ MainWindow::MainWindow(QWidget *parent)
     backgroundMusic->play();
     
     connect(ui->StartButton, &QPushButton::clicked, this, &MainWindow::startButtonSlot);
+    connect(ui->StartButton_2, &QPushButton::clicked, this, &MainWindow::startComputerSlot);
     
     connect(ui->OffMusic, &QToolButton::clicked, this, &MainWindow::ToggleMusicSlot);
     ui->gameFieldBox->hide();
@@ -85,6 +86,7 @@ void MainWindow::startButtonSlot() {
     if (NewGame) {
         resetField();
         ui->StartButton->hide();
+        ui->StartButton_2->hide();
         ui->OffMusic->hide();
         menuText->clear();
         menuText->hide();
@@ -105,6 +107,20 @@ void MainWindow::startButtonSlot() {
     }
 }
 
+void MainWindow::startComputerSlot() {
+    GameVsComputer = true;
+    if (GameVsComputer) {
+        qDebug() << "Новая игра с копьютером\n";
+        resetGame();
+        menuText->clear();
+        menuText->hide();
+        backgroundMusic->stop();
+        packOXXY = QRandomGenerator::global()->bounded(1,3);
+        packSLAVA = QRandomGenerator::global()->bounded(1,3);
+        qDebug() << "Генерация паков";
+    }
+}
+
 void MainWindow::clickOnField() {
     int random;
     QToolButton *button = qobject_cast<QToolButton*>(sender());
@@ -120,8 +136,6 @@ void MainWindow::clickOnField() {
             
             game.PointToFied(row, col, static_cast<int>(player));
             qDebug() << "Точка поставлена, значение" << game.CheckPoint(row, col) << "\n";
-            
-            
             button->setText(player == Player::X ? "X" : "Y");
             button->setEnabled(false);
             qDebug() << packOXXY << "ЩАС БУДЕТ ИГРАТЬ ОКСИ\n";
@@ -171,9 +185,7 @@ void MainWindow::clickOnField() {
 
             }
             
-            
-            
-            if (game.CheckWin(static_cast<int>(player))) {
+            if (game.CheckWin(game.returnField(),static_cast<int>(player))) {
                 win = true;
                 returnWinner(player, win);
                 return;
@@ -188,8 +200,64 @@ void MainWindow::clickOnField() {
             player = (player == Player::X) ? Player::Y : Player::X;
             if (player == Player::X) counterOXXY++;
             else counterSLAVA++;
+
+            if (GameVsComputer && player == Player::Y) {
+                qDebug() << "Ход компьютера\n";
+                ComputerMove();
+            }
         }
     }
+    counter++;
+}
+
+
+void MainWindow::ComputerMove() {
+   
+    QTimer::singleShot(750, this, [this]() {
+        int row = -1;
+        int col = -1;
+
+        int n = game.bestMove(counter);
+        row = n / 3;
+        col = n % 3;
+
+        qDebug() << "row = " << row << " " << "col = " << col << "\n";
+
+        game.PointToFied(row,col, static_cast<int>(Player::Y));
+        QString buttonName = QString("cell_%1_%2").arg(row).arg(col); //ищем кнопку с таким названием
+        QToolButton *computerButton = findChild<QToolButton*>(buttonName); //находим саму кнопку по указателю
+
+        if (computerButton) {
+            computerButton->setEnabled(false);
+            QIcon slavaIcon(":/images/slava_lico.png");
+            slavaIcon.addPixmap(slavaIcon.pixmap(150, QIcon::Normal), QIcon::Disabled);
+            computerButton->setIcon(slavaIcon);
+            computerButton->setIconSize(QSize(200, 200));
+            
+        
+            switch (packSLAVA) {
+                case 1: MainWindow::SLAVA_1_SOUNDS(counterSLAVA); break;
+                case 2: MainWindow::SLAVA_2_SOUNDS(counterSLAVA); break;
+                default: break;
+            }
+        }
+
+        if (game.CheckWin(game.returnField(),static_cast<int>(Player::Y))) {
+            win = true;
+            returnWinner(Player::Y, win);
+            return;
+        }
+            
+        if (game.checkAllCells()) {
+            win = false;
+            returnWinner(Player::Y, win);
+            return;
+        }
+
+        player = Player::X;
+        counterOXXY++;
+
+    });
 }
 
 
@@ -303,16 +371,20 @@ void MainWindow::resetField() {
 
 void MainWindow::resetGame() {
     resetField();
+    qDebug() << "Поле очищено\n";
     game = Tiktaktoe();
     player = Player::X;
     NewGame = false;
     
     ui->gameFieldBox->show();
     ui->StartButton->hide();
+    ui->StartButton_2->hide();
     ui->OffMusic->hide();
+    qDebug() << "Всё спрятано\n";
 }
 
 void MainWindow::returnToMenuSlot(QPushButton* returnButton, QLabel* label) {
+    GameVsComputer = false;
     delete returnButton;
     qDebug() << "returnButton - удалено\n"; 
     delete label;
@@ -324,6 +396,7 @@ void MainWindow::returnToMenuSlot(QPushButton* returnButton, QLabel* label) {
     qDebug() << "gameFieldBox - скрыто\n"; 
     ui->StartButton->show();
     qDebug() << "StartButton - показано\n"; 
+    ui->StartButton_2->show();
     ui->OffMusic->show();
     qDebug() << "OffMusic - показано\n"; 
     NewGame = false;
@@ -332,6 +405,7 @@ void MainWindow::returnToMenuSlot(QPushButton* returnButton, QLabel* label) {
     qDebug() << "NebackgroundMusicwGame - play\n";
     menuText->setPixmap(QPixmap(":/images/menuText.png"));
     menuText->show();
+
 }
 
 void MainWindow::OXXY_1_SOUNDS(int counter) {
@@ -486,8 +560,6 @@ void MainWindow::SLAVA_2_SOUNDS(int counter) {
         break;
     }
 }
-
-
 
 void MainWindow::ToggleMusicSlot() {
   if (audioOutput->volume() > 0.0) {
